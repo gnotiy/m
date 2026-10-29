@@ -295,14 +295,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (prefers-reduced-motion:no-preference){
   .top-awning{animation:awn .9s cubic-bezier(.3,1.5,.5,1) both}
   @keyframes awn{from{transform:translateY(-100%)}}
-  .hero h1 .c{display:inline-block;animation:rise .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*45ms + .3s)}
+  .hero h1 .c{display:inline-block;animation:rise .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*70ms + .3s)}
   @keyframes rise{from{opacity:0;transform:translateY(.6em) rotate(8deg)}}
   .hero .lede,.hero .kicker,.hero-meta{animation:fade .8s both;animation-delay:1.2s}
   @keyframes fade{from{opacity:0;transform:translateY(12px)}}
   .hero-art{animation:popin .9s cubic-bezier(.3,1.6,.5,1) both .5s}
   @keyframes popin{from{opacity:0;transform:scale(.4) rotate(-10deg)}}
 
-  .js .rv{opacity:0;transform:translateY(34px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.9,.25,1.15);transition-delay:var(--d,0s)}
+  .js .rv{opacity:0;transform:translateY(34px);transition:opacity 1s ease,transform 1.1s cubic-bezier(.2,.9,.25,1.15);transition-delay:var(--d,0s)}
   .js .rv.in{opacity:1;transform:none}
   .js .ch-head.rv .ch-num{display:inline-block;transform:scale(0) rotate(-90deg);transition:transform .7s cubic-bezier(.3,1.6,.5,1) .15s}
   .js .ch-head.rv.in .ch-num{transform:none}
@@ -735,7 +735,7 @@ html{--zf:1}html[data-z="2"]{--zf:1.3}html[data-z="3"]{--zf:1.6}
     </div>
     <div class="limits">
       <div><h3>民眾參與門檻高</h3><p>拍照兌換要累積5張照片，還得在上班時間到局裡臨櫃兌換。二手袋循環箱6處，全期補充930個、取用616個，取用率66%，但絕對數量偏低。</p></div>
-      <div><h3>攤商是被動配合</h3><p>攤商普遍認為減塑關鍵在消費者，沒有變成主動宣導的角色。115年用黃金抽獎想拉高參與，結果出現攤商代填代領，誘因沒落到消費者身上。</p></div>
+      <div><h3>攤商是被動配合</h3><p>攤商普遍認為減塑關鍵在消費者，沒有變成主動宣導的角色。114年用黃金抽獎想拉高參與，結果出現攤商代填代領，誘因沒落到消費者身上。</p></div>
       <div><h3>成效靠推估</h3><p>788,100個是以每攤每日10人次、每人3袋、142日反推。116年要求「較114年增加20%」，若改用實測呈現，會和推估值無法對照。</p></div>
     </div>
     <div class="note worry">
@@ -1348,7 +1348,7 @@ function split(el,start){let i=start||0;el.innerHTML=[...el.textContent].map(ch=
 /* ===== counters / typing ===== */
 function countUp(el){
   if(el._done)return; el._done=true;
-  const to=+el.dataset.count, from=+(el.dataset.from||0), suf=el.dataset.suf||'', dur=1400, t0=performance.now();
+  const to=+el.dataset.count, from=+(el.dataset.from||0), suf=el.dataset.suf||'', dur=2200, t0=performance.now();
   if(reduce){el.textContent=to.toLocaleString('zh-TW')+suf;return;}
   (function f(t){const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=Math.round(from+(to-from)*e).toLocaleString('zh-TW')+suf;if(p<1)requestAnimationFrame(f);})(t0);
 }
@@ -1369,7 +1369,7 @@ const Reveal=(function(){
     els.forEach(el=>{
       el._rv=1; el.classList.add('rv');
       const sib=[...el.parentElement.children].filter(x=>x.matches(sel)); const k=sib.indexOf(el);
-      if(k>0 && !el.matches('.ch-head')) el.style.setProperty('--d',Math.min(k,6)*0.12+'s');
+      if(k>0 && !el.matches('.ch-head')) el.style.setProperty('--d',Math.min(k,6)*0.2+'s');
       io.observe(el);
     });
   }
@@ -1386,14 +1386,17 @@ const Reveal=(function(){
     if(!pio) pio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){fire(e.target);pio.unobserve(e.target);}}),{threshold:.2,rootMargin:'0px 0px -15% 0px'});
     requestAnimationFrame(()=>requestAnimationFrame(()=>{sec.querySelectorAll('.rv').forEach(el=>pio.observe(el));if(sec.matches('.rv'))pio.observe(sec);}));
   }
-  return {scan,reset,watch};
+  function unfire(el){el.classList.remove('in');el.querySelectorAll('.rv').forEach(x=>x.classList.remove('in'));}
+  function fireAll(el){fire(el);el.querySelectorAll('.rv').forEach(fire);}
+  function observeAll(){if(!io||reduce)return document.querySelectorAll('.rv').forEach(fire);document.querySelectorAll('.rv:not(.in)').forEach(el=>io.observe(el));}
+  return {scan,reset,watch,fire:fireAll,unfire,observeAll};
 })();
 document.querySelectorAll('.cmp tbody tr').forEach((r,i)=>r.style.setProperty('--r',i));
 /* bag grid */
 (function(){
   const gO=document.getElementById('gOut'), gI=document.getElementById('gIn');
   for(let i=0;i<12;i++){const c=document.createElement('i');c.className='chip out';c.style.transitionDelay=(i*30)+'ms';gO.appendChild(c);}
-  for(let i=0;i<100;i++){const c=document.createElement('i');c.className='chip in';c.style.transitionDelay=(400+i*14)+'ms';gI.appendChild(c);}
+  for(let i=0;i<100;i++){const c=document.createElement('i');c.className='chip in';c.style.transitionDelay=(600+i*25)+'ms';gI.appendChild(c);}
   if(reduce||!('IntersectionObserver' in window)){gO.classList.add('on');gI.classList.add('on');return;}
   const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){gO.classList.add('on');gI.classList.add('on');io.disconnect();}})},{threshold:.35});
   io.observe(gO.parentElement);
@@ -1495,7 +1498,7 @@ document.querySelectorAll('.layer>button').forEach(btn=>btn.addEventListener('cl
 let metricT=null;
 function runMetric(){
   const b=$('mB'); if(reduce)return; clearInterval(metricT); let v=8;b.textContent=8;
-  metricT=setInterval(()=>{v--;b.textContent=v;b.animate&&b.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:220});if(v<=3)clearInterval(metricT);},380);
+  metricT=setInterval(()=>{v--;b.textContent=v;b.animate&&b.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:220});if(v<=3)clearInterval(metricT);},650);
 }
 
 /* ===== budgets ===== */
@@ -1597,7 +1600,7 @@ const Signal=(function(){
   btns.forEach((b,i)=>b.addEventListener('click',()=>{clearInterval(auto);show(i);}));
   show(0);
   if(!reduce && 'IntersectionObserver' in window){
-    const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();auto=setInterval(()=>{if(cur>=3){clearInterval(auto);return;}show(cur+1);},2600);}},{threshold:.5});
+    const io=new IntersectionObserver(es=>{if(es[0].isIntersecting&&!document.body.classList.contains('present')){io.disconnect();auto=setInterval(()=>{if(cur>=3){clearInterval(auto);return;}show(cur+1);},2600);}},{threshold:.5});
     io.observe(body);
   }
 })();
@@ -1649,31 +1652,57 @@ $('ifBtn').addEventListener('click',e=>{const o=$('ifAns').classList.toggle('ope
 
 
 
-/* ===== presentation mode ===== */
+/* ===== presentation mode (step by step) ===== */
 const Present=(function(){
-  let cur=null; const visited=new Set();
+  let cur=null, steps=[], si=0; const visited=new Set();
   const body=document.body, lab=$('presLab'), nb=$('presNext'), tg=$('presToggle');
+  const AUTO='.ch-head,.hl h2.big,.first';
   const isOn=()=>body.classList.contains('present');
   const panelOf=s=>{const p=s.closest('.panel');return p?p.id.slice(-1):null;};
   const moreBelow=()=>scrollY < document.documentElement.scrollHeight-innerHeight-150;
+  function buildSteps(s){
+    const tops=[...s.querySelectorAll('.rv')].filter(el=>{let p=el.parentElement;while(p&&p!==s){if(p.classList.contains('rv'))return false;p=p.parentElement;}return true;});
+    const auto=tops.filter(el=>el.matches(AUTO)), rest=tops.filter(el=>!el.matches(AUTO));
+    const out=[];
+    rest.forEach(el=>{
+      const last=out[out.length-1];
+      if(el.matches('.dec li') && last && last[0].matches('.dec li')) last.push(el); else out.push([el]);
+    });
+    if(s.id==='end') out.push([document.querySelector('footer')]);
+    return {auto,steps:out};
+  }
   function update(){
     if(!isOn()||!cur)return;
-    const i=chapters.indexOf(cur); lab.textContent=(i+1)+' / '+chapters.length;
-    nb.textContent=moreBelow()?'往下 ↓':'下一頁 ›';
+    const all=[...document.querySelectorAll('[data-nav]')], i=all.indexOf(cur);
+    lab.textContent=(i+1)+' / '+all.length+(steps.length?'　'+si+'/'+steps.length:'');
+    nb.textContent= si<steps.length?'下一步 ›':(moreBelow()?'往下 ↓':'下一頁 ›');
   }
-  function go(s){
+  function show(group){
+    group.forEach(el=>{el.style.setProperty('--d','0s');Reveal.fire(el);});
+    const r=group[0].getBoundingClientRect();
+    if(r.bottom>innerHeight*.92||r.top<0){
+      const y=scrollY+r.top-Math.max(80,(innerHeight-Math.min(r.height,innerHeight*.8))/2);
+      window.scrollTo({top:Math.max(0,y),behavior:reduce?'auto':'smooth'});
+    }
+  }
+  function go(s,showAll){
     if(!s)return;
     if(cur)cur.classList.remove('cur');
-    Reveal.reset(s);
+    Reveal.reset(s); document.querySelector('footer').classList.remove('in');
     cur=s; s.classList.add('cur');
     body.classList.toggle('at-end',s.id==='end');
     const pn=panelOf(s); if(pn)visited.add(pn);
     window.scrollTo(0,0);
-    Reveal.watch(s);
-    if(s.id==='end') Reveal.watch(document.querySelector('footer'));
+    const b=buildSteps(s); steps=b.steps; si=0;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      b.auto.forEach(el=>Reveal.fire(el));
+      if(showAll){steps.forEach(g=>g.forEach(el=>Reveal.fire(el)));si=steps.length;}
+      update();
+    }));
     Nav.refresh();
   }
   function next(){
+    if(si<steps.length){show(steps[si++]);update();return;}
     if(moreBelow()){window.scrollBy({top:innerHeight*.72,behavior:reduce?'auto':'smooth'});return;}
     if(cur.id==='pick'&&!document.querySelector('.panel:not([hidden])')){Pick.open('1',false);visited.add('1');return go($('panel1').querySelector('[data-nav]'));}
     const pn=panelOf(cur);
@@ -1682,8 +1711,8 @@ const Present=(function(){
     const i=chapters.indexOf(cur); if(i<chapters.length-1)go(chapters[i+1]);
   }
   function prev(){
-    if(scrollY>8){window.scrollBy({top:-innerHeight*.72,behavior:reduce?'auto':'smooth'});return;}
-    const i=chapters.indexOf(cur); if(i>0)go(chapters[i-1]);
+    if(si>0){si--;steps[si].forEach(el=>Reveal.unfire(el));update();return;}
+    const i=chapters.indexOf(cur); if(i>0)go(chapters[i-1],true);
   }
   function toggle(force){
     const want=force===undefined?!isOn():force;
@@ -1693,7 +1722,8 @@ const Present=(function(){
       go(chapters[i]||chapters[0]);
     }else{
       body.classList.remove('present','at-end'); tg.setAttribute('aria-pressed','false');
-      const s=cur; if(cur)cur.classList.remove('cur'); cur=null;
+      const s=cur; if(cur)cur.classList.remove('cur'); cur=null; steps=[]; si=0;
+      Reveal.observeAll();
       if(s)s.scrollIntoView(); Nav.refresh();
     }
   }
